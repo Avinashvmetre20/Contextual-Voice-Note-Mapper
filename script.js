@@ -7,6 +7,13 @@ const ctx = canvas.getContext('2d');
 const clearBtn = document.getElementById('clearBtn');
 const exportBtn = document.getElementById('exportBtn');
 
+const speechPopup = document.getElementById('speechPopup');
+const popupTranscript = document.getElementById('popupTranscript');
+const popupPitchCanvas = document.getElementById('popupPitchCanvas');
+const popupPitchCtx = popupPitchCanvas.getContext('2d');
+const closePopup = document.getElementById('closePopup');
+const stopSpeechBtn = document.getElementById('stopSpeechBtn');
+
 // App State
 const STORAGE_KEY = 'voiceNotesAppData';
 let isRecording = false;
@@ -112,6 +119,8 @@ row.innerHTML = `
                 // Center and zoom map
                 map.setZoom(15);
                 map.panTo({ lat, lng });
+
+                 document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
 
                 // Highlight the row
                 const row = location.closest('tr');
@@ -352,64 +361,75 @@ function toggleRecording() {
 }
 
 // ============ SPEECH SYNTHESIS ============
-table.addEventListener('click', (event) => {
+let speechAnalyser;
+let speechAudioCtx;
+let speechGainNode;
+let speechAnimationId;
+let isSpeechPaused = false;
+
+// Update the table click handler
+table.addEventListener('click', async (event) => {
     const target = event.target;
 
-    // Handle transcript clicks (speech synthesis)
     if (target.classList.contains('lazy-note')) {
         const text = target.textContent || target.dataset.text;
         if (text && speechSynthesis) {
-            // Stop any currently playing speech
             speechSynthesis.cancel();
-
+            
+            // Show popup with full text
+            popupTranscript.textContent = text;
+            speechPopup.style.display = 'flex';
+            
+            // Initialize audio context for visualization
+            speechAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            speechAnalyser = speechAudioCtx.createAnalyser();
+            speechAnalyser.fftSize = 2048;
+            speechGainNode = speechAudioCtx.createGain();
+            speechGainNode.gain.value = 0; // Mute the output
+            
+            // Create a dummy oscillator to connect to analyser
+            const oscillator = speechAudioCtx.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 0;
+            oscillator.connect(speechGainNode);
+            speechGainNode.connect(speechAnalyser);
+            speechAnalyser.connect(speechAudioCtx.destination);
+            oscillator.start();
+            
+            // Start visualization
+            visualizeSpeechPitch();
+            
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            
+            // When speech starts, update visualization
+            utterance.onboundary = (event) => {
+                if (event.name === 'word') {
+                    // You could highlight words as they're spoken here
+                }
+            };
+            
+            utterance.onend = () => {
+                cancelAnimationFrame(speechAnimationId);
+                if (speechAudioCtx) {
+                    speechAudioCtx.close();
+                }
+                setTimeout(() => {
+                    if (!speechSynthesis.speaking && !isSpeechPaused) {
+                        speechPopup.style.display = 'none';
+                    }
+                }, 1000);
+            };
+            
+            speechSynthesis.speak(utterance);
+            
             const row = target.closest('tr');
             row.style.backgroundColor = 'rgba(66, 133, 244, 0.1)';
-
             utterance.onend = () => {
                 row.style.backgroundColor = '';
             };
-
-            speechSynthesis.speak(utterance);
-        }
-    }
-
-    // Handle location clicks (map pin)
-    else if (target.classList.contains('location-link') || target.closest('.location-link')) {
-        const locationCell = target.classList.contains('location-link') ? target : target.closest('.location-link');
-        const locationText = locationCell.textContent;
-
-        // Extract coordinates from text like "New York (40.7128, -74.0060)"
-        const coordsMatch = locationText.match(/\(([-\d.]+),\s*([-\d.]+)\)/);
-
-        if (coordsMatch && map) {
-            const lat = parseFloat(coordsMatch[1]);
-            const lng = parseFloat(coordsMatch[2]);
-            const position = { lat, lng };
-
-            // Clear existing markers
-            clearMarkers();
-
-            // Add new marker
-            const marker = new google.maps.Marker({
-                position: position,
-                map: map,
-                title: `Note from ${locationText.split('(')[0].trim()}`
-            });
-            markers.push(marker);
-
-            // Center and zoom map
-            map.setZoom(15);
-            map.panTo(position);
-
-            // Highlight the row temporarily
-            const row = locationCell.closest('tr');
-            row.style.backgroundColor = 'rgba(234, 67, 53, 0.1)';
-            setTimeout(() => {
-                row.style.backgroundColor = '';
-            }, 1000);
         }
     }
 });
@@ -593,4 +613,103 @@ updateSystemInfo();
 // Listen for network changes
 if (navigator.connection) {
     navigator.connection.addEventListener('change', updateSystemInfo);
+}
+
+
+closePopup.addEventListener('click', () => {
+    speechPopup.style.display = 'none';
+    speechSynthesis.cancel();
+});
+
+stopSpeechBtn.addEventListener('click', () => {
+    speechSynthesis.cancel();
+});
+
+// Modify the table click event handler
+table.addEventListener('click', (event) => {
+    const target = event.target;
+
+    // Handle transcript clicks (speech synthesis)
+    if (target.classList.contains('lazy-note')) {
+        const text = target.textContent || target.dataset.text;
+        if (text && speechSynthesis) {
+            // Stop any currently playing speech
+            speechSynthesis.cancel();
+
+            // Show popup
+            popupTranscript.textContent = text;
+            speechPopup.style.display = 'flex';
+            
+            // Clear and prepare the pitch canvas
+            popupPitchCtx.clearRect(0, 0, popupPitchCanvas.width, popupPitchCanvas.height);
+            
+            // Create a new analyser for the speech synthesis
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+            
+            // Create a dummy gain node to connect to analyser
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0; // Mute the output
+            gainNode.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            
+            // Draw the initial empty pitch graph
+            drawPopupPitch(analyser);
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            
+            // When speech starts, connect to the analyser
+            utterance.onstart = () => {
+                const audioSource = audioCtx.createMediaStreamSource(
+                    audioCtx.createMediaStreamDestination().stream
+                );
+                audioSource.connect(gainNode);
+                const drawInterval = setInterval(() => {
+                    drawPopupPitch(analyser);
+                }, 50);
+                
+                utterance.onend = () => {
+                    clearInterval(drawInterval);
+                    audioSource.disconnect();
+                };
+            };
+            
+            utterance.onend = () => {
+                // Keep the popup open for a moment after speech ends
+                setTimeout(() => {
+                    if (!speechSynthesis.speaking) {
+                        speechPopup.style.display = 'none';
+                    }
+                }, 1000);
+            };
+            
+            speechSynthesis.speak(utterance);
+            
+            const row = target.closest('tr');
+            row.style.backgroundColor = 'rgba(66, 133, 244, 0.1)';
+            
+            utterance.onend = () => {
+                row.style.backgroundColor = '';
+            };
+        }
+    }
+});
+
+function drawPopupPitch(analyser) {
+    const bufferLength = analyser.fftSize;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
+
+    const sliceWidth = popupPitchCanvas.width / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * popupPitchCanvas.height / 2;
+
+        i === 0 ? popupPitchCtx.moveTo(x, y) : popupPitchCtx.lineTo(x, y);
+        x += sliceWidth;
+    }
 }
