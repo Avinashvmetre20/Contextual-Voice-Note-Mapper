@@ -15,7 +15,10 @@ This app solves these problems by **automatically capturing rich context** with 
 - **Speech-to-text transcription**
 - **Voice pitch visualization** (Canvas API)
 - **Background sync** for offline functionality
-- 
+### screenshots
+- ** Homepage**
+- ![Homepage Screenshot](./images/map.png)
+  
 
 ### Interactive Visualization
 - **Map view** of all notes (Google Maps API)
