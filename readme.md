@@ -57,23 +57,11 @@ This app solves these problems by **automatically capturing rich context** with 
    cd Contextual-Voice-Note-Mapper
 
 
-const GOOGLE_MAPS_API_KEY = 'your-key-here';
-const OPENWEATHER_API_KEY = 'your-key-here';
+### const GOOGLE_MAPS_API_KEY = 'your-key-here';
+### const OPENWEATHER_API_KEY = 'your-key-here';
 
 
-graph TD
-    A[User Starts Recording] --> B[Capture Location]
-    B --> C[Get Weather Data]
-    A --> D[Analyze Network Quality]
-    D --> E[Adjust Recording Parameters]
-    A --> F[Record Audio + Pitch Visualization]
-    F --> G[Transcribe Speech]
-    G --> H[Save with Context Metadata]
-    H --> I[Display on Map]
-
-
-
-    # Common Issues
+# Common Issues
 
 ## Location Not Working
 - Ensure browser has location permissions
