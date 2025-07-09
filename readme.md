@@ -53,8 +53,8 @@ This app solves these problems by **automatically capturing rich context** with 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/voice-note-mapper.git
-   cd voice-note-mapper
+   git clone https://github.com/Avinashvmetre20/Contextual-Voice-Note-Mapper
+   cd Contextual-Voice-Note-Mapper
 
 
 const GOOGLE_MAPS_API_KEY = 'your-key-here';
