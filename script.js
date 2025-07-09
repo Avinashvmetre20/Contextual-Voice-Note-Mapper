@@ -61,25 +61,23 @@ function renderNotes() {
                </span>`
             : 'Unknown';
 
-        row.innerHTML = `
-            <td class="lazy-note" data-text="${note.text}">Loading preview...</td>
-            <td class="location-cell">${locationContent}</td>
-            <td>${note.description}</td>
-            <td>${note.temp}</td>
-            <td>${note.humidity}</td>
-            <td>${note.pitch}</td>
-            <td>${note.time}</td>
-            <td class="action-cell">
-                <button class="delete-btn" data-index="${index}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                </button>
-            </td>
-        `;
+       // In the row.innerHTML template
+row.innerHTML = `
+    <td class="lazy-note" data-text="${note.text}">Loading preview...</td>
+    <td class="location-cell">${locationContent}</td>
+    <td>${note.description}</td>
+    <td>${note.temp}</td>
+    <td>${note.humidity}</td>
+    <td>${note.pitch}</td>
+    <td>${note.network?.effectiveType || 'Unknown'}</td>
+    <td>${note.device?.platform || 'Unknown'}</td>
+    <td>${note.time}</td>
+    <td class="action-cell">
+        <button class="delete-btn" data-index="${index}">
+            delete
+        </button>
+    </td>
+`;
         table.appendChild(row);
         observer.observe(row.children[0]);
     });
@@ -290,20 +288,23 @@ async function startRecording() {
 
             pitchValues = [];
 
-            const note = {
-                text: transcript.trim(),
-                location: locationData
-                    ? `${weatherData?.location || 'Unknown'} (${locationData.lat}, ${locationData.lon})`
-                    : "Unknown",
-                description: weatherData?.description || "Unknown",
-                temp: weatherData?.temp ?? "—",
-                humidity: weatherData?.humidity ?? "—",
-                pressure: weatherData?.pressure ?? "—",
-                wind: weatherData?.windSpeed ?? "—",
-                pitch: avgPitch,
-                time,
-                quality
-            };
+            // Update in the recognition.onresult handler
+const note = {
+    text: transcript.trim(),
+    location: locationData
+        ? `${weatherData?.location || 'Unknown'} (${locationData.lat}, ${locationData.lon})`
+        : "Unknown",
+    description: weatherData?.description || "Unknown",
+    temp: weatherData?.temp ?? "—",
+    humidity: weatherData?.humidity ?? "—",
+    pressure: weatherData?.pressure ?? "—",
+    wind: weatherData?.windSpeed ?? "—",
+    pitch: avgPitch,
+    time,
+    quality,
+    network: getNetworkInfo(),
+    device: getDeviceInfo()
+};
 
             notes.unshift(note);
             saveNotes();
@@ -426,13 +427,28 @@ function exportToCSV() {
         return;
     }
 
-    const headers = Object.keys(notes[0]);
+    const headers = [
+        'text', 'location', 'description', 'temp', 'humidity', 
+        'pitch', 'networkType', 'networkSpeed', 'devicePlatform', 
+        'deviceCores', 'deviceMemory', 'time'
+    ];
     let csv = headers.join(",") + "\n";
 
     notes.forEach(note => {
-        const row = headers.map(header => {
-            let value = note[header];
-            // Escape quotes and wrap in quotes if contains commas
+        const row = [
+            note.text,
+            note.location,
+            note.description,
+            note.temp,
+            note.humidity,
+            note.pitch,
+            note.network?.effectiveType || 'Unknown',
+            note.network?.downlink || 'Unknown',
+            note.device?.platform || 'Unknown',
+            note.device?.cores || 'Unknown',
+            note.device?.memory || 'Unknown',
+            note.time
+        ].map(value => {
             if (typeof value === 'string' && value.includes(',')) {
                 return `"${value.replace(/"/g, '""')}"`;
             }
@@ -523,3 +539,58 @@ function plotSavedNotes() {
     });
 }
 
+
+
+// ============ NETWORK & SYSTEM INFO ============
+function getNetworkInfo() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!connection) return null;
+    
+    return {
+        type: connection.type || 'unknown',
+        effectiveType: connection.effectiveType || 'unknown',
+        downlink: connection.downlink || 'unknown',
+        rtt: connection.rtt || 'unknown',
+        saveData: connection.saveData || false
+    };
+}
+
+function getDeviceInfo() {
+    return {
+        platform: navigator.platform || 'unknown',
+        userAgent: navigator.userAgent,
+        cores: navigator.hardwareConcurrency || 'unknown',
+        memory: navigator.deviceMemory || 'unknown',
+        touchSupport: 'ontouchstart' in window
+    };
+}
+
+function updateSystemInfo() {
+    const networkInfo = getNetworkInfo();
+    const deviceInfo = getDeviceInfo();
+    
+    const networkElement = document.getElementById('networkStatus');
+    const deviceElement = document.getElementById('deviceInfo');
+    
+    if (networkInfo) {
+        networkElement.innerHTML = `
+            <strong>Network:</strong> ${networkInfo.effectiveType.toUpperCase()} | 
+            <strong>Speed:</strong> ${networkInfo.downlink}Mb/s | 
+            <strong>Latency:</strong> ${networkInfo.rtt}ms
+        `;
+    }
+    
+    deviceElement.innerHTML = `
+        <strong>Device:</strong> ${deviceInfo.platform} | 
+        <strong>Cores:</strong> ${deviceInfo.cores} | 
+        <strong>Memory:</strong> ${deviceInfo.memory}GB
+    `;
+}
+
+// Call this during initialization
+updateSystemInfo();
+
+// Listen for network changes
+if (navigator.connection) {
+    navigator.connection.addEventListener('change', updateSystemInfo);
+}

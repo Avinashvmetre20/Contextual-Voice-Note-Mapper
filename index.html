@@ -23,6 +23,11 @@
                 <div class="visualizer-container">
                     <canvas id="pitchCanvas" width="400" height="100"></canvas>
                 </div>
+                <!-- Add this below the visualizer container in your HTML -->
+                <div class="system-info">
+                    <div id="networkStatus">Network: Checking...</div>
+                    <div id="deviceInfo">Device: Loading...</div>
+                </div>
             </section>
 
             <section class="notes-section">
@@ -37,6 +42,7 @@
                 <div class="table-container">
                     <table id="notesTable">
                         <thead>
+                            <!-- Update your table headers -->
                             <tr>
                                 <th>Transcript</th>
                                 <th>Location</th>
@@ -44,6 +50,8 @@
                                 <th>Temp (°C)</th>
                                 <th>Humidity</th>
                                 <th>Pitch</th>
+                                <th>Network</th>
+                                <th>Device</th>
                                 <th>Time</th>
                                 <th>Actions</th>
                             </tr>

@@ -373,3 +373,18 @@ td {
     0% { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
 }
+
+
+.system-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+#networkStatus, #deviceInfo {
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
