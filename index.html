@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Note Mapper with Context</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Contextual Voice Note Mapper</h1>
+            <p class="subtitle">Record voice notes with environmental context</p>
+        </header>
+
+        <main>
+            <section class="controls">
+                <button id="toggleBtn" class="record-btn">Start Recording</button>
+                <div id="status" class="status">Press Start to begin</div>
+                <div class="visualizer-container">
+                    <canvas id="pitchCanvas" width="400" height="100"></canvas>
+                </div>
+            </section>
+
+            <section class="notes-section">
+                <div class="notes-header">
+                    <h2>Voice Notes</h2>
+                    <div class="actions">
+                        <button id="clearBtn" class="action-btn">Clear All</button>
+                        <button id="exportBtn" class="action-btn">Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="notesTable">
+                        <thead>
+                            <tr>
+                                <th>Transcript</th>
+                                <th>Location</th>
+                                <th>Weather</th>
+                                <th>Temp (°C)</th>
+                                <th>Humidity</th>
+                                <th>Pitch</th>
+                                <th>Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <h2>Your Location Map</h2>
+    <div id="map" style="height: 400px; width: 100%; margin-bottom: 1rem;"></div>
+
+    <script src="script.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCowUbrCLivE9CM_7kvrjymS59UIfStmY4&callback=initMap"
+        async defer></script>
+
+</body>
+
+</html>
