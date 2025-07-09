@@ -15,17 +15,28 @@ This app solves these problems by **automatically capturing rich context** with 
 - **Speech-to-text transcription**
 - **Voice pitch visualization** (Canvas API)
 - **Background sync** for offline functionality
-- 
+  
+- **Voice Recording**
+- ![voice Screenshot](./images/voice.png)
+  
 
 ### Interactive Visualization
 - **Map view** of all notes (Google Maps API)
 - **Note clustering** by location density
 - **Lazy loading** of transcripts (Intersection Observer API)
+- **map view**
+- ![map Screenshot](./images/map.png)
+
+- **voice note**
+- ![map Screenshot](./images/note.png)
 
 ### Performance Optimizations
 - **Adaptive recording quality** based on network conditions
 - **Efficient data storage** with localStorage
 - **CSV export** for data portability
+
+-  **CSV File**
+- ![csv Screenshot](./images/csv.png)
 
 ## APIs Used
 
