@@ -2,17 +2,6 @@
 
 **Never lose context for your voice notes again!**  
 A web app that records voice notes with environmental context (location, weather, network conditions) and visualizes them on an interactive map.
-
-
-## Problem Statement
-
-People frequently record voice notes but often forget the **context** - where they were, what the environment was like, or why they recorded it. Traditional voice memo apps lack:
-
--  **Location context** (Where was I when I recorded this?)
--  **Environmental data** (What was the weather/temperature?)
--  **Network-aware recording** (Was I in a low-signal area affecting quality?)
--  **Visual mapping** (Where are all my notes clustered geographically?)
-
 This app solves these problems by **automatically capturing rich context** with every voice note.
 
 ## Key Features
@@ -26,6 +15,7 @@ This app solves these problems by **automatically capturing rich context** with 
 - **Speech-to-text transcription**
 - **Voice pitch visualization** (Canvas API)
 - **Background sync** for offline functionality
+- 
 
 ### Interactive Visualization
 - **Map view** of all notes (Google Maps API)
@@ -53,27 +43,15 @@ This app solves these problems by **automatically capturing rich context** with 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/voice-note-mapper.git
-   cd voice-note-mapper
+   git clone https://github.com/Avinashvmetre20/Contextual-Voice-Note-Mapper
+   cd Contextual-Voice-Note-Mapper
 
 
-const GOOGLE_MAPS_API_KEY = 'your-key-here';
-const OPENWEATHER_API_KEY = 'your-key-here';
+### const GOOGLE_MAPS_API_KEY = 'your-key-here';
+### const OPENWEATHER_API_KEY = 'your-key-here';
 
 
-graph TD
-    A[User Starts Recording] --> B[Capture Location]
-    B --> C[Get Weather Data]
-    A --> D[Analyze Network Quality]
-    D --> E[Adjust Recording Parameters]
-    A --> F[Record Audio + Pitch Visualization]
-    F --> G[Transcribe Speech]
-    G --> H[Save with Context Metadata]
-    H --> I[Display on Map]
-
-
-
-    # Common Issues
+# Common Issues
 
 ## Location Not Working
 - Ensure browser has location permissions

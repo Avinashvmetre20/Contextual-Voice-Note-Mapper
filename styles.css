@@ -291,6 +291,7 @@ td {
     text-overflow: ellipsis;
     cursor: pointer;
     transition: var(--transition);
+    color: #3d6acb;
 }
 
 .lazy-note:hover {
