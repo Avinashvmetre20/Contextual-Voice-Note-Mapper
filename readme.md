@@ -2,17 +2,6 @@
 
 **Never lose context for your voice notes again!**  
 A web app that records voice notes with environmental context (location, weather, network conditions) and visualizes them on an interactive map.
-
-
-## Problem Statement
-
-People frequently record voice notes but often forget the **context** - where they were, what the environment was like, or why they recorded it. Traditional voice memo apps lack:
-
--  **Location context** (Where was I when I recorded this?)
--  **Environmental data** (What was the weather/temperature?)
--  **Network-aware recording** (Was I in a low-signal area affecting quality?)
--  **Visual mapping** (Where are all my notes clustered geographically?)
-
 This app solves these problems by **automatically capturing rich context** with every voice note.
 
 ## Key Features
@@ -26,6 +15,7 @@ This app solves these problems by **automatically capturing rich context** with 
 - **Speech-to-text transcription**
 - **Voice pitch visualization** (Canvas API)
 - **Background sync** for offline functionality
+- 
 
 ### Interactive Visualization
 - **Map view** of all notes (Google Maps API)
